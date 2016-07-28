@@ -49,6 +49,11 @@ class Controlunit(object):
                 if write_data:
                     for name, logical in data.iteritems():
                         with ApiClient('sensorreadings') as api:
+                            if logical['data'] == None:
+                                Log('error', 'Physical sensor "' + sensor.name + '" (' + sensor.id + ') ' +
+                                    'data returned None for logical sensor ' + str(logical['id']))
+                                continue
+
                             try:
                                 result = api.call({
                                     'group_id': group_id,
