@@ -8,6 +8,7 @@ import RPi.GPIO as GPIO
 import ConfigParser
 import controlunit
 from system.log import Log
+from vendors.Adafruit_DHT import Raspberry_Pi_2
 
 
 class Main(object):
@@ -25,23 +26,22 @@ class Main(object):
         print 'initiating'
         self.config.read('config.ini')
 
-        # initiate LEDs
         GPIO.setmode(GPIO.BCM)
 
         while True:
             # sensorreadinggroup_id
             _uuid = uuid.uuid4()
 
-            self.__heartbeat()
 
-            #try:
-            self.controlunit.read_and_submit_sensor_data(_uuid)
-            #except Exception as e:
-            #    Log('exception',
-            #        'Exception while Fetching and submitting sensor data: "' + str(e) + '"')
+            self.__heartbeat()
+            try:
+                self.controlunit.read_and_submit_sensor_data(_uuid)
+            except Exception as e:
+                Log('exception',
+                    'Exception while Fetching and submitting sensor data: "' + str(e) + '"')
 
             try:
-                self.controlunit.fetch_and_process_pending_actions()
+                self.controlunit.fetch_and_action_appliance_states()
             except Exception as e:
                 Log('exception',
                     'Exception while Fetching and processing actions data: "' + str(e) + '"')

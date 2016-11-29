@@ -4,6 +4,7 @@
 import ConfigParser
 import base64
 import json
+from system.log import Log
 from system.http_request import HttpRequest
 
 class ApiClient(object):
@@ -12,6 +13,7 @@ class ApiClient(object):
     http_request = HttpRequest()
     auth_type = ''
     path = ''
+    url = ''
 
     def __init__(self, path):
         self.config.read('config.ini')
@@ -33,6 +35,13 @@ class ApiClient(object):
                 self.config.get('api_auth_' + self.auth_type, 'password')
             ))
 
-    def call(self, data):
+    def call(self, data=None):
         rawdata = self.http_request.dispatch_request(self.path, data)
-        return json.loads(rawdata)
+        try:
+            jsonData = json.loads(rawdata)
+        except Exception:
+            Log('error', 'Exception while parsing API result from request ' + self.path + ' with ' + data + ''
+                         '. Rawdata: ' + rawdata)
+            return
+
+        return jsonData

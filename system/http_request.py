@@ -20,8 +20,10 @@ class HttpRequest(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def dispatch_request(self, path, data={}):
-        data = urllib.urlencode(data)
+    def dispatch_request(self, path, data=None):
+        if data is not None:
+            data = urllib.urlencode(data)
+
         url = self.config.get('api', 'uri') + '/' + path
 
         req = urllib2.Request(url, data, self.headers)
