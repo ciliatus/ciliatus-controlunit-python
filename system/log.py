@@ -1,37 +1,30 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from datetime import datetime
+import logging
+from logging.handlers import TimedRotatingFileHandler
 
 
-class Log:
+def setup_logger(name='root'):
+    log_formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(threadName)s - %(message)s'
+    )
 
-    def __init__(self, level, text):
-        HEADER = '\033[95m'
-        OKBLUE = '\033[94m'
-        OKGREEN = '\033[92m'
-        WARNING = '\033[93m'
-        FAIL = '\033[91m'
-        ENDC = '\033[0m'
-        BOLD = '\033[1m'
-        UNDERLINE = '\033[4m'
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
 
-        prefix = ''
-        if level == 'error':
-            prefix = FAIL
-        elif level == 'warning':
-            prefix = WARNING
-        elif level == 'success':
-            prefix = OKGREEN
-        elif level == 'debug':
-            prefix = OKBLUE
-        elif level == 'exception':
-            prefix = BOLD + FAIL
+    file_handler = TimedRotatingFileHandler('log/controlunit.log', when='midnight')
+    file_handler.setFormatter(log_formatter)
+    file_handler.setLevel(logging.INFO)
+    logger.addHandler(file_handler)
 
-        print prefix + '[' + level + ']: ' + text + ENDC
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(log_formatter)
+    console_handler.setLevel(logging.DEBUG)
+    logger.addHandler(console_handler)
 
-        with open("tc.log", "a") as f:
-            f.write(str(datetime.now()) + prefix + '[' + level + ']: ' + text + '\n')
+    return logger
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+
+def get_logger(name='root'):
+    return logging.getLogger(name)

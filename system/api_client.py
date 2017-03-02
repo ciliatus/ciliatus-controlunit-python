@@ -1,19 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import ConfigParser
+import configparser
 import base64
 import json
-from system.log import Log
+import system.log as log
 from system.http_request import HttpRequest
+
 
 class ApiClient(object):
 
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.ConfigParser()
     http_request = HttpRequest()
     auth_type = ''
     path = ''
     url = ''
+    logger = log.get_logger()
 
     def __init__(self, path):
         self.config.read('config.ini')
@@ -29,19 +31,36 @@ class ApiClient(object):
         pass
 
     def __add_auth(self):
+        """ Leverages ``http_request.add_header`` to add authentication information
+        :return:
+        """
         if self.auth_type == 'basic':
             self.http_request.add_header('Authorization', 'Basic ' + base64.b64encode(
                 self.config.get('api_auth_' + self.auth_type, 'user') + ':' +
                 self.config.get('api_auth_' + self.auth_type, 'password')
             ))
+        elif self.auth_type == 'oauth2_personal_token':
+            self.http_request.add_header(
+                'Authorization', 'Bearer ' + self.config.get('api_auth_' + self.auth_type, 'token')
+            )
 
     def call(self, data=None):
-        rawdata = self.http_request.dispatch_request(self.path, data)
-        try:
-            jsonData = json.loads(rawdata)
-        except Exception:
-            Log('error', 'Exception while parsing API result from request ' + self.path + ' with ' + data + ''
-                         '. Rawdata: ' + rawdata)
-            return
+        """ Executes the api call
+        :param data: A dict with optional POST data
+        :return: JSON data or None
+        """
+        raw_data = self.http_request.dispatch_request(self.path, data)
 
-        return jsonData
+        if raw_data is None:
+            return None
+
+        try:
+            json_data = json.loads(raw_data)
+        except ValueError as err:
+            self.logger.critical('ApiClient.call: Could not load json: %s', err)
+            return None
+        except Exception as err:
+            self.logger.critical('ApiClient.call: Unknown exception while loading json: %s', err)
+            return None
+
+        return json_data
