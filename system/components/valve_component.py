@@ -31,6 +31,12 @@ class ValveComponent(component.Component):
 
     def set_state(self, new_state):
         if new_state == 'running':
-            self.set_gpio_pin(True)
+            if self.default_high:
+                self.set_gpio_pin(False)
+            else:
+                self.set_gpio_pin(True)
         else:
-            self.set_gpio_pin(False)
+            if self.default_high:
+                self.set_gpio_pin(True)
+            else:
+                self.set_gpio_pin(False)

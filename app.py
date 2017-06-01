@@ -2,16 +2,25 @@
 # -*- coding: utf-8 -*-
 import configparser
 import datetime
+import json
+import urllib.error
+from json import JSONDecodeError
+
 import RPi.GPIO as GPIO
 import system.log as log
 import time
 from random import randint
 
+from system.api_client import ApiClient
 from system.components import component_factory
 from worker import desired_state_fetcher, sensorreading_submitter
 
+from multiprocessing import Process
+
 
 class App(object):
+
+    VERSION = 'Ciliatus Controlunit v0.2-beta'
 
     logger = log.get_logger()
     config = configparser.ConfigParser()
@@ -45,12 +54,27 @@ class App(object):
         """
         self.components = []
 
+    def __check_in(self):
+        with ApiClient('controlunits/' + self.config.get('main', 'id') + '/check_in') as api:
+            try:
+                api.call({
+                    'software_version': self.VERSION
+                }, 'PUT')
+            except urllib.error.HTTPError as err:
+                try:
+                    result = json.loads(err.read())
+                except JSONDecodeError as json_err:
+                    self.logger.critical('Controlunit checking failed: %s', format(json_err))
+                else:
+                    self.logger.critical('Controlunit checking failed: %s', format(result.error))
+
     def __load_and_setup_components(self):
         """ Loads all non-sensor components from config and sets up their gpio.
         :return:
         """
         self.logger.debug('App.__load_and_setup_components: Setting up components\' GPIO')
 
+        self.__cleanup_components()
         GPIO.setmode(GPIO.BCM)
 
         for section in self.config.sections():
@@ -94,13 +118,16 @@ class App(object):
         thread_id = randint(0, 32769)
         if thread_name == 'sensorreading_submitter':
             self.threads[thread_name]['thread'] = \
-                sensorreading_submitter.SensorreadingSubmitter(thread_id,
-                                                               thread_name + '-' + str(thread_id))
+                Process(
+                    target=sensorreading_submitter.SensorreadingSubmitter,
+                    args=(thread_id, thread_name + '-' + str(thread_id))
+                )
         elif thread_name == 'desired_state_fetcher':
             self.threads[thread_name]['thread'] = \
-                desired_state_fetcher.DesiredStateFetcher(thread_id,
-                                                          thread_name + '-' + str(thread_id),
-                                                          self.components)
+                Process(
+                    target=desired_state_fetcher.DesiredStateFetcher,
+                    args=(thread_id, thread_name + '-' + str(thread_id), self.components)
+                )
         else:
             self.logger.critical('App.__spawn_thread: Unknown class name for thread: %s.', thread_name)
             return
@@ -111,7 +138,7 @@ class App(object):
     def __get_last_run_seconds(self, thread_name):
         """ Returns the difference of `self.threads[thread_name]['last_run']` and now
         :param thread_name:
-        :return: A int Difference in seconds
+        :return: int Difference in seconds
         """
         return int((datetime.datetime.now() - self.threads[thread_name]['last_run']).total_seconds())
 
@@ -138,7 +165,7 @@ class App(object):
         """
         if self.threads[thread_name]['thread'] is None:
             self.__check_thread_conditions_and_spawn(thread_name)
-        elif not self.threads[thread_name]['thread'].isAlive():
+        elif not self.threads[thread_name]['thread'].is_alive():
             self.__check_thread_conditions_and_spawn(thread_name)
         else:
             self.logger.debug('App.__check_thread: Thread %s already running.', thread_name)
@@ -155,6 +182,7 @@ class App(object):
         :return:
         """
         self.__load_and_setup_components()
+        self.__check_in()
 
         while True:
             self.__check_threads()
@@ -166,8 +194,10 @@ config = configparser.ConfigParser()
 try:
     App().run()
 except Exception as ex:
-    logger.info('Crashed: %s.', format(ex))
+    logger.exception('Crashed, cleaning up GPIO: %s.', format(ex))
     GPIO.cleanup()
 except KeyboardInterrupt:
-    logger.info('Quitting')
+    logger.info('Keyboard interrupt. Cleaning up GPIO and quitting.')
     GPIO.cleanup()
+finally:
+    logger.info('Bye')

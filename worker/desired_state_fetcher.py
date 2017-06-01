@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import datetime
-import threading
 import system.log as log
 import configparser
 import system.api_client as api_client
+from multiprocessing import Process
 import system.components.component_factory as component_factory
 
 
-class DesiredStateFetcher(threading.Thread):
+class DesiredStateFetcher(Process):
 
     config = configparser.ConfigParser()
     logger = log.get_logger()
@@ -17,11 +17,12 @@ class DesiredStateFetcher(threading.Thread):
 
     def __init__(self, thread_id, name, components):
         self.components = components
-        threading.Thread.__init__(self)
+        Process.__init__(self)
         self.thread_id = thread_id
         self.name = name
 
         self.config.read('config.ini')
+        self.run()
 
     def __enter__(self):
         return self
@@ -39,11 +40,13 @@ class DesiredStateFetcher(threading.Thread):
 
     def __set_component_state(self, component, state):
         """ Sets the state of a component
-        :param component: A Component
-        :param state: A String
+        :param component: Component
+        :param state: String
         :return:
         """
         try:
+            self.logger.debug('DesiredStateFetcher.__set_component_state: Setting %s to %s.',
+                              component.name, state)
             component.set_state(state)
         except Exception as err:
             self.logger.critical('DesiredStateFetcher.__set_component_state: '
@@ -56,7 +59,7 @@ class DesiredStateFetcher(threading.Thread):
         """ Retrieves and sets all states by evaluating the desired_states dict.
         If desired_states is None it is expected that the API query resulted in an Exception.
         In that case all component will be turned off.
-        :param desired_states: A dict of desired states (String)
+        :param desired_states: dict of desired states (String)
         :return:
         """
         for component in self.components:
@@ -66,16 +69,18 @@ class DesiredStateFetcher(threading.Thread):
             else:
                 self.__set_component_state(component, False)
 
-    @staticmethod
-    def __calculate_new_component_state(desired_states, component):
+    def __calculate_new_component_state(self, desired_states, component):
         """ If a component's desired state is contained the desired_states dict, this state will be returned
         Otherwise False will be returned to turn the component off
-        :param desired_states: A dict of desired states (String)
-        :param component: A Component which's new desired state should be returned
+        :param desired_states: dict of desired states (String)
+        :param component: Component which's new desired state should be returned
         :return:
         """
         if len(desired_states[component.type]) > 0:
             if component.id in desired_states[component.type]:
+                self.logger.debug('DesiredStateFetcher.__calculate_new_component_state: '
+                                  'Setting component %s to %s',
+                                  component.name, desired_states[component.type][component.id])
                 return desired_states[component.type][component.id]
         return False
 
@@ -86,6 +91,7 @@ class DesiredStateFetcher(threading.Thread):
         with api_client.ApiClient('controlunits/' + self.config.get('main', 'id') + '/fetch_desired_states') as api:
             result = api.call()
             if result is not None:
+                self.logger.debug('DesiredStateFetcher.__retrieve_desired_states_and_set: Got result, handling')
                 self.__handle_api_result(result['data'])
             else:
                 self.logger.critical('DesiredStateFetcher.__retrieve_desired_states_and_set: API returned None. '

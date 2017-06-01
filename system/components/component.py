@@ -23,7 +23,7 @@ class Component(object):
         pass
 
     def set_gpio_pin(self, new_state: bool):
-        self.logger.info('Component.set_gpio_pin: Setting pin %s of component %s to %s.',
+        self.logger.debug('Component.set_gpio_pin: Setting pin %s of component %s to %s.',
                          str(self.pin), self.name, str(new_state))
 
         GPIO.output(self.pin, new_state)

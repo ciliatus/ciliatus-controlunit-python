@@ -31,7 +31,7 @@ class ApiClient(object):
         pass
 
     def __add_auth(self):
-        """ Leverages ``http_request.add_header`` to add authentication information
+        """ Uses ``http_request.add_header`` to add authentication information
         :return:
         """
         if self.auth_type == 'basic':
@@ -44,13 +44,13 @@ class ApiClient(object):
                 'Authorization', 'Bearer ' + self.config.get('api_auth_' + self.auth_type, 'token')
             )
 
-    def call(self, data=None):
+    def call(self, data=None, method=None):
         """ Executes the api call
-        :param data: A dict with optional POST data
+        :param data: dict with optional POST data
+        :param method: String with GET/POST/PUT/DELETE/... (optional)
         :return: JSON data or None
         """
-        raw_data = self.http_request.dispatch_request(self.path, data)
-
+        raw_data = self.http_request.dispatch_request(self.path, data, method, 15)
         if raw_data is None:
             return None
 

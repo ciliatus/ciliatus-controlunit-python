@@ -32,8 +32,8 @@ class AM2302Sensor(sensor.Sensor):
 
     def __fetch_raw_data(self, is_second_try=False):
         """ Tries to fetch data from the sensor
-        :param is_second_try: A boolean if False a second try will be attempted on failure
-        :return: A dict with retrieved data or None
+        :param is_second_try: boolean if False a second try will be attempted on failure
+        :return: dict with retrieved data or None
         """
         try:
             humidity, temperature = MyPyDHT.sensor_read(MyPyDHT.Sensor.DHT22, self.pin)

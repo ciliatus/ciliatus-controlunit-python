@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import json
-import threading
+import traceback
 import uuid
 from json import JSONDecodeError
 import MyPyDHT
@@ -11,9 +11,10 @@ import configparser
 import urllib.error
 import system.api_client as api_client
 import system.sensors.sensor_factory as sensor_factory
+from multiprocessing import Process
 
 
-class SensorreadingSubmitter(threading.Thread):
+class SensorreadingSubmitter(Process):
 
     config = configparser.ConfigParser()
     logger = log.get_logger()
@@ -21,12 +22,13 @@ class SensorreadingSubmitter(threading.Thread):
     counter = 0
 
     def __init__(self, thread_id, name):
-        threading.Thread.__init__(self)
+        Process.__init__(self)
         self.thread_id = thread_id
         self.name = name
 
         self.config.read('config.ini')
         self.__load_sensors()
+        self.run()
 
     def __enter__(self):
         return self
@@ -42,7 +44,7 @@ class SensorreadingSubmitter(threading.Thread):
 
     def __load_sensors(self):
         """ Loads sensors from config an creates the matching object for each sensor type.
-            Then adds th em to ``self.sensors``
+            Then adds them to ``self.sensors``
         :return:
         """
         self.__cleanup_sensors()
@@ -60,9 +62,9 @@ class SensorreadingSubmitter(threading.Thread):
 
     def __handle_sensorreading(self, sensor, result, group_id):
         """
-        :param sensor: A :class:`Sensor`
-        :param result: A dict containing retrieved sensor readings
-        :param group_id: A :class:`uuid` Reading group ids are used to calculate averages in ciliatus.
+        :param sensor: :class:`Sensor`
+        :param result: dict containing retrieved sensor readings
+        :param group_id: :class:`uuid` Reading group ids are used to calculate averages in ciliatus.
                          One run should have one randomly generated group id
         :return:
         """
@@ -92,17 +94,17 @@ class SensorreadingSubmitter(threading.Thread):
 
     def __get_sensorreading(self, sensor, group_id):
         """ Retrieves sensor reading from a single sensor
-        :param sensor: A :class:`Sensor`
-        :param group_id: A :class:`uuid` Reading group ids are used to calculate averages in ciliatus.
+        :param sensor: :class:`Sensor`
+        :param group_id: :class:`uuid` Reading group ids are used to calculate averages in ciliatus.
                          One run should have one randomly generated group id
         :return:
         """
         try:
             data = sensor.get_sensorreading()
         except MyPyDHT.DHTException as err:
-            self.logger.critical('Could not fetch DHT sensorreading for of %s: %s', sensor.name, format(err))
+            self.logger.critical('Could not fetch DHT sensorreading of %s: %s', sensor.name, traceback.print_exc())
         except Exception as err:
-            self.logger.critical('Could not fetch sensorreading for of %s: %s', sensor.name, format(err))
+            self.logger.critical('Could not fetch sensorreading of %s: %s', sensor.name, traceback.print_exc())
         else:
             self.__handle_sensorreading(sensor, data, group_id)
 
