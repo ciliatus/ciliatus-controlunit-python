@@ -34,9 +34,6 @@ MyPyDHT supports the following sensors:
 * DHT11
 * DHT22
 * AM2302
-
-Currently only AM2302 is implemented and tested.
-
-Planned for the near future:
-
 * BME280
+
+Implementing any other I2C sensor than BME280 should be a trivial task.
