@@ -1,16 +1,18 @@
 # ciliatus_controlunit
-ciliatus Control Unit for Raspberry PI
+Ciliatus Control Unit
+Primarily used for GPIO controlled sensors on a Raspberry Pi
 
 # Requirements
 
-* Python 3.6
-* [Ciliatus](https://github.com/matthenning/ciliatus) Installation (>=v1.6-beta)
-* [RPi.GPIO](https://pypi.python.org/pypi/RPi.GPIO)
-* [MyPyDHT](https://github.com/freedom27/MyPyDHT)
+* Python >=3.6
+* [Ciliatus](https://github.com/matthenning/ciliatus) >=v1.6-beta
+* [RPi.GPIO](https://pypi.python.org/pypi/RPi.GPIO) (for Raspberry PIs)
+* [MyPyDHT](https://github.com/freedom27/MyPyDHT) (for Raspberry PIs)
 
 # Setup
 
-Generate config in Ciliatus and copy to `config.ini`
+* Generate config in Ciliatus and copy to `config.ini`.
+* Add authentication tokens
 
 # Run
 
@@ -25,6 +27,8 @@ Otherwise
 You can run it in background using nohup:
 
 `sudo nohup python app.py &`
+
+Note: root permissions are only required for GPIO access.
 
 # Supported sensors
 
