@@ -3,6 +3,7 @@
 
 import system.sensors.am2302_sensor as am2302_sensor
 import system.sensors.bme280_sensor as bme280_sensor
+import system.sensors.dummy_sensor as dummy_sensor
 
 
 class SensorFactory(object):
@@ -12,6 +13,8 @@ class SensorFactory(object):
             return am2302_sensor.AM2302Sensor(config)
         if sensor_type == 'BME280':
             return bme280_sensor.BME280Sensor(config)
+        if sensor_type == 'Dummy':
+            return dummy_sensor.DummySensor(config)
         else:
             raise ValueError("Unknown sensor type: %s", sensor_type)
     factory = staticmethod(factory)

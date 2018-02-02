@@ -6,16 +6,26 @@ import json
 import urllib.error
 from json import JSONDecodeError
 
-import RPi.GPIO as GPIO
+import importlib
+
+from multiprocessing.managers import BaseManager
+
 import system.log as log
+import system.stash as stash
 import time
 from random import randint
 
 from system.api_client import ApiClient
 from system.components import component_factory
-from worker import desired_state_fetcher, sensorreading_submitter
+from worker import desired_state_fetcher, sensorreading_submitter, sensorreading_buffer
 
-from multiprocessing import Process
+from multiprocessing import Process, freeze_support
+
+try:
+    importlib.util.find_spec('RPI.GPIO')
+    import RPi.GPIO as GPIO
+except ModuleNotFoundError:
+    pass
 
 
 class App(object):
@@ -29,6 +39,10 @@ class App(object):
 
     def __init__(self):
         self.config.read('config.ini')
+        BaseManager.register('Stash', stash.Stash)
+        manager = BaseManager()
+        manager.start()
+        self.stash = manager.Stash()
         self.threads = {
             'sensorreading_submitter': {
                 'last_run': None,
@@ -38,6 +52,11 @@ class App(object):
             'desired_state_fetcher': {
                 'last_run': None,
                 'timeout': int(self.config.get('api', 'fetch_desired_states_interval')),
+                'thread': None
+            },
+            'sensorreading_buffer': {
+                'last_run': None,
+                'timeout': int(self.config.get('api', 'sensorreading_buffer_flush_interval')),
                 'thread': None
             }
         }
@@ -75,7 +94,12 @@ class App(object):
         self.logger.debug('App.__load_and_setup_components: Setting up components\' GPIO')
 
         self.__cleanup_components()
-        GPIO.setmode(GPIO.BCM)
+
+        try:
+            importlib.util.find_spec('RPI.GPIO')
+            GPIO.setmode(GPIO.BCM)
+        except ModuleNotFoundError:
+            self.logger.debug('App.__load_and_setup_components: Skipping RPi.GPIO module because it was not found')
 
         for section in self.config.sections():
             if section.split('_')[0] in ['pump', 'valve', 'generic_component']:
@@ -120,7 +144,7 @@ class App(object):
             self.threads[thread_name]['thread'] = \
                 Process(
                     target=sensorreading_submitter.SensorreadingSubmitter,
-                    args=(thread_id, thread_name + '-' + str(thread_id))
+                    args=(thread_id, thread_name + '-' + str(thread_id), self.stash),
                 )
         elif thread_name == 'desired_state_fetcher':
             self.threads[thread_name]['thread'] = \
@@ -128,10 +152,18 @@ class App(object):
                     target=desired_state_fetcher.DesiredStateFetcher,
                     args=(thread_id, thread_name + '-' + str(thread_id), self.components)
                 )
+        elif thread_name == 'sensorreading_buffer':
+            self.threads[thread_name]['thread'] = \
+                Process(
+                    target=sensorreading_buffer.SensorreadingBuffer,
+                    args=(thread_id, thread_name + '-' + str(thread_id), self.stash)
+                )
         else:
             self.logger.critical('App.__spawn_thread: Unknown class name for thread: %s.', thread_name)
             return
 
+        if __name__ == '__main__':
+            freeze_support()
         self.threads[thread_name]['thread'].start()
         self.threads[thread_name]['last_run'] = datetime.datetime.now()
 
@@ -192,12 +224,22 @@ logger = log.setup_logger()
 config = configparser.ConfigParser()
 
 try:
-    App().run()
+    if __name__ == '__main__':
+        freeze_support()
+        App().run()
 except Exception as ex:
-    logger.exception('Crashed, cleaning up GPIO: %s.', format(ex))
-    GPIO.cleanup()
+    logger.exception('Crashed, cleaning up: %s.', format(ex))
+    try:
+        importlib.util.find_spec('RPI.GPIO')
+        GPIO.cleanup()
+    except ModuleNotFoundError:
+        pass
 except KeyboardInterrupt:
-    logger.info('Keyboard interrupt. Cleaning up GPIO and quitting.')
-    GPIO.cleanup()
+    logger.info('Keyboard interrupt. Cleaning up and quitting.')
+    try:
+        importlib.util.find_spec('RPI.GPIO')
+        GPIO.cleanup()
+    except ModuleNotFoundError:
+        pass
 finally:
     logger.info('Bye')

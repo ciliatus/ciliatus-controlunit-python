@@ -5,7 +5,6 @@ import json
 import traceback
 import uuid
 from json import JSONDecodeError
-import MyPyDHT
 import system.log as log
 import configparser
 import urllib.error
@@ -20,11 +19,13 @@ class SensorreadingSubmitter(Process):
     logger = log.get_logger()
     sensors = []
     counter = 0
+    stash = None
 
-    def __init__(self, thread_id, name):
+    def __init__(self, thread_id, name, stash):
         Process.__init__(self)
         self.thread_id = thread_id
         self.name = name
+        self.stash = stash
 
         self.config.read('config.ini')
         self.__load_sensors()
@@ -75,22 +76,15 @@ class SensorreadingSubmitter(Process):
             return
 
         for name, data in result.items():
-            with api_client.ApiClient('sensorreadings') as api:
-                try:
-                    api.call({
-                        'group_id': group_id,
-                        'logical_sensor_id': str(data['id']),
-                        'rawvalue': str(data['data'])
-                    })
-                except urllib.error.HTTPError as err:
-                    try:
-                        result = json.loads(err.read())
-                    except JSONDecodeError as json_err:
-                        self.logger.critical('SensorreadingSubmitter.do_work: Sensorreading push failed for '
-                                             'PS %s LS %s: %s', sensor.name, str(data['id']), format(json_err))
-                    else:
-                        self.logger.critical('SensorreadingSubmitter.do_work: Sensorreading push failed for '
-                                             'PS %s LS %s: %s', sensor.name, str(data['id']), result.error)
+            self.stash.put({
+                'payload': data,
+                'group_id': group_id,
+                'sensor': sensor
+            })
+            self.logger.debug(
+                'SensorreadingSubmitter.__handle_sensorreading: Put stash (size %i) group_id %s sensor %s',
+                self.stash.count(), group_id, sensor.name
+            )
 
     def __get_sensorreading(self, sensor, group_id):
         """ Retrieves sensor reading from a single sensor
@@ -101,8 +95,6 @@ class SensorreadingSubmitter(Process):
         """
         try:
             data = sensor.get_sensorreading()
-        except MyPyDHT.DHTException as err:
-            self.logger.critical('Could not fetch DHT sensorreading of %s: %s', sensor.name, traceback.print_exc())
         except Exception as err:
             self.logger.critical('Could not fetch sensorreading of %s: %s', sensor.name, traceback.print_exc())
         else:
