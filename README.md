@@ -4,14 +4,13 @@ ciliatus Control Unit for Raspberry PI
 # Requirements
 
 * Python 3.6
-* [Ciliatus](https://github.com/matthenning/ciliatus) Installation (>=v1.2-beta)
+* [Ciliatus](https://github.com/matthenning/ciliatus) Installation (>=v1.6-beta)
 * [RPi.GPIO](https://pypi.python.org/pypi/RPi.GPIO)
 * [MyPyDHT](https://github.com/freedom27/MyPyDHT)
 
 # Setup
 
-1. Generate config in Ciliatus and copy to `config.ini`
-2. Fill in pin variables. Use the BCM layout.
+Generate config in Ciliatus and copy to `config.ini`
 
 # Run
 
@@ -36,4 +35,4 @@ MyPyDHT supports the following sensors:
 * AM2302
 * BME280
 
-Implementing any other I2C sensor than BME280 should be a trivial task.
+Other I2C sensors than BME280 should be relatively simple to implement using the existing infrastructure.
