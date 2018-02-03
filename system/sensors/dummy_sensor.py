@@ -2,6 +2,10 @@
 # -*- coding:utf-8 -*-
 import random
 
+import datetime
+
+import math
+
 import system.log as log
 import system.sensors.sensor as sensor
 import configparser
@@ -30,15 +34,23 @@ class DummySensor(sensor.Sensor):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
+    @staticmethod
+    def __get_minutes_since_midnight():
+        now = datetime.datetime.now()
+        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        return int((now - midnight).seconds/60)
+
     def get_sensorreading(self):
-        raw_data = [random.randint(50, 99), random.randint(21, 26)]
+        minutes = self.__get_minutes_since_midnight()
+        temperature = 20 +  3 * (math.sin(minutes/1440*2*math.pi - 0.5*math.pi)+1)
+        humidity    = 50 + 25 * (math.sin(minutes/1440*2*math.pi + 0.5*math.pi)+1)
         return {
             'humidity_percent': {
                 'id': self.logical['humidity_percent'],
-                'data': raw_data[0]
+                'data': humidity
             },
             'temperature_celsius': {
                 'id': self.logical['temperature_celsius'],
-                'data': raw_data[1]
+                'data': temperature
             }
         }
