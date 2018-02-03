@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import importlib
 from importlib import util
 import time
 
@@ -9,11 +8,10 @@ import system.sensors.sensor as sensor
 import configparser
 
 try:
-    importlib.util.find_spec('MyPyDHT')
+    util.find_spec('MyPyDHT')
     import MyPyDHT
 except ModuleNotFoundError:
     pass
-
 
 
 class AM2302Sensor(sensor.Sensor):

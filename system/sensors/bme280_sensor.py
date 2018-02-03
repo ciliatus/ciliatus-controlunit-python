@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import importlib
 from importlib import util
 import time
 import os
@@ -9,7 +8,7 @@ import system.sensors.sensor as sensor
 import configparser
 
 try:
-    importlib.util.find_spec('Adafruit_PureIO.smbus')
+    util.find_spec('Adafruit_PureIO.smbus')
     import Adafruit_PureIO.smbus as smbus
 except ModuleNotFoundError:
     pass

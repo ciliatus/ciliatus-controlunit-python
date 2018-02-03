@@ -6,7 +6,6 @@ import json
 import urllib.error
 from json import JSONDecodeError
 
-import importlib
 from importlib import util
 
 from multiprocessing.managers import BaseManager
@@ -23,7 +22,7 @@ from worker import desired_state_fetcher, sensorreading_submitter, sensorreading
 from multiprocessing import Process, freeze_support
 
 try:
-    importlib.util.find_spec('RPI.GPIO')
+    util.find_spec('RPI.GPIO')
     import RPi.GPIO as GPIO
 except ModuleNotFoundError:
     pass
@@ -97,7 +96,7 @@ class App(object):
         self.__cleanup_components()
 
         try:
-            importlib.util.find_spec('RPI.GPIO')
+            util.find_spec('RPI.GPIO')
             GPIO.setmode(GPIO.BCM)
         except ModuleNotFoundError:
             self.logger.debug('App.__load_and_setup_components: Skipping RPi.GPIO module because it was not found')
@@ -231,14 +230,14 @@ try:
 except Exception as ex:
     logger.exception('Crashed, cleaning up: %s.', format(ex))
     try:
-        importlib.util.find_spec('RPI.GPIO')
+        util.find_spec('RPI.GPIO')
         GPIO.cleanup()
     except ModuleNotFoundError:
         pass
 except KeyboardInterrupt:
     logger.info('Keyboard interrupt. Cleaning up and quitting.')
     try:
-        importlib.util.find_spec('RPI.GPIO')
+        util.find_spec('RPI.GPIO')
         GPIO.cleanup()
     except ModuleNotFoundError:
         pass
