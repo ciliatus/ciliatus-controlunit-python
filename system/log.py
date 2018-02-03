@@ -5,13 +5,13 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 
-def setup_logger(name='root'):
+def setup_logger(name='root', level=logging.DEBUG):
     log_formatter = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(threadName)s - %(message)s'
     )
 
     logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(level)
 
     file_handler = TimedRotatingFileHandler('log/controlunit.log', when='midnight')
     file_handler.setFormatter(log_formatter)

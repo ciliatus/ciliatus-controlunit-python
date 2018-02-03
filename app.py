@@ -3,6 +3,7 @@
 import configparser
 import datetime
 import json
+import logging
 import urllib.error
 from json import JSONDecodeError
 
@@ -220,7 +221,7 @@ class App(object):
             self.__check_threads()
             time.sleep(2)
 
-logger = log.setup_logger()
+logger = log.setup_logger(logging.INFO)
 config = configparser.ConfigParser()
 
 try:
