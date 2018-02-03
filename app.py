@@ -221,7 +221,7 @@ class App(object):
             self.__check_threads()
             time.sleep(2)
 
-logger = log.setup_logger(logging.INFO)
+logger = log.setup_logger(level=logging.INFO)
 config = configparser.ConfigParser()
 
 try:
