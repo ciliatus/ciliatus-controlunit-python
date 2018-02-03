@@ -1,7 +1,6 @@
-[submodule "Adafruit_Python_PureIO"]
+[submodule "setup/Adafruit_Python_PureIO"]
 	path = setup/Adafruit_Python_PureIO
 	url = https://github.com/adafruit/Adafruit_Python_PureIO
-
-[submodule "Adafruit_Python_GPIO"]
+[submodule "setup/Adafruit_Python_GPIO"]
 	path = setup/Adafruit_Python_GPIO
 	url = https://github.com/adafruit/Adafruit_Python_GPIO
