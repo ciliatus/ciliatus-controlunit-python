@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+import importlib
 
 import system.log as log
 import configparser
-import RPi.GPIO as GPIO
+
+try:
+    importlib.util.find_spec('RPi.GPIO')
+    import RPi.GPIO
+except ModuleNotFoundError:
+    pass
 
 
 class Component(object):

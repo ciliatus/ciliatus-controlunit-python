@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+import importlib
 import time
 import os
 import system.log as log
 import system.sensors.sensor as sensor
 import configparser
 
-import Adafruit_PureIO.smbus as smbus
+try:
+    importlib.util.find_spec('Adafruit_PureIO.smbus')
+    import Adafruit_PureIO.smbus as smbus
+except ModuleNotFoundError:
+    pass
+
 import system.sensors.lib.Adafruit_BME280 as Adafruit_BME280
 
 

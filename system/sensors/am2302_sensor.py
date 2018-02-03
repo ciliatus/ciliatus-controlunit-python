@@ -1,11 +1,18 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+import importlib
 import time
 
 import system.log as log
 import system.sensors.sensor as sensor
 import configparser
-import MyPyDHT
+
+try:
+    importlib.util.find_spec('MyPyDHT')
+    import MyPyDHT
+except ModuleNotFoundError:
+    pass
+
 
 
 class AM2302Sensor(sensor.Sensor):
