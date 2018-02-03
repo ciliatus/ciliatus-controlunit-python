@@ -7,6 +7,7 @@ import urllib.error
 from json import JSONDecodeError
 
 import importlib
+from importlib import util
 
 from multiprocessing.managers import BaseManager
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import importlib
+from importlib import util
 
 import system.log as log
 import configparser
