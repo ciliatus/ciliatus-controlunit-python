@@ -26,6 +26,7 @@ try:
     util.find_spec('RPI.GPIO')
     import RPi.GPIO as GPIO
 except ModuleNotFoundError:
+    log.get_logger().debug('App: Skipping RPi.GPIO module because it was not found')
     pass
 
 
@@ -100,7 +101,6 @@ class App(object):
             util.find_spec('RPI.GPIO')
             GPIO.setmode(GPIO.BCM)
         except ModuleNotFoundError:
-            self.logger.debug('App.__load_and_setup_components: Skipping RPi.GPIO module because it was not found')
             return
 
         for section in self.config.sections():

@@ -8,6 +8,12 @@ import system.sensors.sensor as sensor
 import configparser
 from system.sensors.lib import Adafruit_BME280
 
+try:
+    util.find_spec('Adafruit_PureIO.smbus')
+    import Adafruit_PureIO.smbus as smbus
+except ModuleNotFoundError:
+    log.get_logger().critical("bme280_sensor: Adafruit_PureIO.smbus missing")
+
 
 class BME280Sensor(sensor.Sensor):
 
@@ -17,12 +23,6 @@ class BME280Sensor(sensor.Sensor):
     i2c_multiplexer_address = ''
 
     def __init__(self, config):
-        try:
-            util.find_spec('Adafruit_PureIO.smbus')
-            import Adafruit_PureIO.smbus as smbus
-        except ModuleNotFoundError:
-            self.logger.critical("bme280_sensor.__init__(): Adafruit_PureIO.smbus missing")
-            return
         sensor.Sensor.__init__(self)
         self.config.read('config.ini')
 
