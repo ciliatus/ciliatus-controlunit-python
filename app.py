@@ -101,6 +101,7 @@ class App(object):
             GPIO.setmode(GPIO.BCM)
         except ModuleNotFoundError:
             self.logger.debug('App.__load_and_setup_components: Skipping RPi.GPIO module because it was not found')
+            return
 
         for section in self.config.sections():
             if section.split('_')[0] in ['pump', 'valve', 'generic_component']:
