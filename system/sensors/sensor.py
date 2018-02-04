@@ -9,6 +9,8 @@ class Sensor(object):
 
     config = configparser.ConfigParser()
     logger = log.get_logger()
+    name = ''
+    id = ''
 
     def __init__(self):
         self.config.read('config.ini')
