@@ -7,11 +7,6 @@ import system.log as log
 import system.sensors.sensor as sensor
 import configparser
 
-try:
-    util.find_spec('MyPyDHT')
-    import MyPyDHT
-except ModuleNotFoundError:
-    pass
 
 
 class AM2302Sensor(sensor.Sensor):
@@ -20,6 +15,13 @@ class AM2302Sensor(sensor.Sensor):
     logger = log.get_logger()
 
     def __init__(self, config):
+        try:
+            util.find_spec('MyPyDHT')
+            import MyPyDHT
+        except ModuleNotFoundError:
+            self.logger.critical("am2302_sensor.__init__(): MyPyDHT missing")
+            return
+
         sensor.Sensor.__init__(self)
         self.config.read('config.ini')
 

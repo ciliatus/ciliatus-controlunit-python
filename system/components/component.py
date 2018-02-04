@@ -5,12 +5,6 @@ from importlib import util
 import system.log as log
 import configparser
 
-try:
-    util.find_spec('RPi.GPIO')
-    import RPi.GPIO
-except ModuleNotFoundError:
-    pass
-
 
 class Component(object):
 
@@ -20,6 +14,12 @@ class Component(object):
     name = ''
 
     def __init__(self):
+        try:
+            util.find_spec('RPi.GPIO')
+            import RPi.GPIO
+        except ModuleNotFoundError:
+            self.logger.critical("Component.__init__(): RPi.GPIO missing")
+            return
         self.config.read('config.ini')
 
     def __enter__(self):
