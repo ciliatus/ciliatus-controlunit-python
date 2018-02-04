@@ -13,6 +13,8 @@ class BME280Sensor(sensor.Sensor):
 
     config = configparser.ConfigParser()
     logger = log.get_logger()
+    i2c_address = ''
+    i2c_multiplexer_address = ''
 
     def __init__(self, config):
         try:

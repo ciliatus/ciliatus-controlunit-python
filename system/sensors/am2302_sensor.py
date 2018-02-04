@@ -13,6 +13,7 @@ class AM2302Sensor(sensor.Sensor):
 
     config = configparser.ConfigParser()
     logger = log.get_logger()
+    pin = 0
 
     def __init__(self, config):
         try:
