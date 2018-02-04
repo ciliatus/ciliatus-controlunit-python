@@ -98,6 +98,7 @@ class App(object):
 
         try:
             util.find_spec('RPI.GPIO')
+            import RPi.GPIO as GPIO
             GPIO.setmode(GPIO.BCM)
         except ModuleNotFoundError:
             self.logger.debug('App.__load_and_setup_components: Skipping RPi.GPIO module because it was not found')
@@ -232,6 +233,7 @@ except Exception as ex:
     logger.exception('Crashed, cleaning up: %s.', format(ex))
     try:
         util.find_spec('RPI.GPIO')
+        import RPi.GPIO as GPIO
         GPIO.cleanup()
     except ModuleNotFoundError:
         pass
@@ -239,6 +241,7 @@ except KeyboardInterrupt:
     logger.info('Keyboard interrupt. Cleaning up and quitting.')
     try:
         util.find_spec('RPI.GPIO')
+        import RPi.GPIO as GPIO
         GPIO.cleanup()
     except ModuleNotFoundError:
         pass

@@ -7,7 +7,7 @@ import configparser
 
 try:
     util.find_spec('RPi.GPIO')
-    import RPi.GPIO
+    import RPi.GPIO as GPIO
 except ModuleNotFoundError:
     pass
 
