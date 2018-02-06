@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import system.log as log
 import configparser
 
+import system.log as log
 from system.components import component
 
 

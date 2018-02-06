@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+import configparser
 from importlib import util
 
 import system.log as log
-import configparser
 
 try:
     util.find_spec('RPi.GPIO')

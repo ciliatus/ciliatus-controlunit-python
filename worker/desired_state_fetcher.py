@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import datetime
-import system.log as log
 import configparser
-import system.api_client as api_client
+import datetime
 from multiprocessing import Process
-import system.components.component_factory as component_factory
+
+import system.api_client as api_client
+import system.log as log
 
 
 class DesiredStateFetcher(Process):

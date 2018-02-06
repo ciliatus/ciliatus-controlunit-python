@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-from importlib import util
+import configparser
 import time
+from importlib import util
 
 import system.log as log
 import system.sensors.sensor as sensor
-import configparser
 
 try:
     util.find_spec('MyPyDHT')

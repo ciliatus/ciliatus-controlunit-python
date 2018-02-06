@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-from importlib import util
-import time
+import configparser
 import os
+import time
+from importlib import util
+
 import system.log as log
 import system.sensors.sensor as sensor
-import configparser
 from system.sensors.lib import Adafruit_BME280
 
 try:

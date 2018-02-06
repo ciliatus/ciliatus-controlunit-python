@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import json
+import time
 import urllib
 from json import JSONDecodeError
-
-import time
-
-import system.log as log
 from multiprocessing import Process
 
+import system.log as log
 from system import api_client
 
 

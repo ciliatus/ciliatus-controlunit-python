@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import datetime
+import configparser
+import socket
 import urllib.error
 import urllib.parse
 import urllib.request
+
 import system.log as log
-import configparser
-import socket
 
 
 class HttpRequest(object):

@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import random
 
+import configparser
 import datetime
-
 import math
 
 import system.log as log
 import system.sensors.sensor as sensor
-import configparser
 
 
 class DummySensor(sensor.Sensor):

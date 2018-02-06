@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import configparser
 import datetime
-import json
 import traceback
 import uuid
-from json import JSONDecodeError
-import system.log as log
-import configparser
-import urllib.error
-import system.api_client as api_client
-import system.sensors.sensor_factory as sensor_factory
 from multiprocessing import Process
+
+import system.log as log
+import system.sensors.sensor_factory as sensor_factory
 
 
 class SensorreadingSubmitter(Process):
