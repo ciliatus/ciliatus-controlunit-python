@@ -34,7 +34,7 @@ class Maintenance(Process):
         with api_client.ApiClient('controlunits/%s/check_in' % self.id) as api:
             try:
                 client_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                api.call({
+                result = api.call({
                     'software_version': self.version,
                     'client_time': client_time
                 }, 'PUT')
