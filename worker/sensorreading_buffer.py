@@ -38,7 +38,8 @@ class SensorreadingBuffer(Process):
                     result = api.call({
                         'group_id': item['group_id'],
                         'logical_sensor_id': str(item['payload']['id']),
-                        'rawvalue': str(item['payload']['data'])
+                        'rawvalue': str(item['payload']['data']),
+                        'read_at': item['read_at']
                     })
                     self.logger.debug(
                         'SensorreadingBuffer.run(): Pushed group_id %s sensor %s' %
