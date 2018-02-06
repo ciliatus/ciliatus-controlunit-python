@@ -28,48 +28,56 @@ class SensorreadingBuffer(Process):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
+    def __submit_sensorreading(self, item):
+        with api_client.ApiClient('sensorreadings') as api:
+            result = None
+
+            try:
+                result = api.call({
+                    'group_id': item['group_id'],
+                    'logical_sensor_id': str(item['payload']['id']),
+                    'rawvalue': str(item['payload']['data']),
+                    'read_at': item['read_at']
+                })
+                self.logger.debug(
+                    'SensorreadingBuffer.run(): Pushed group_id %s sensor %s' %
+                    (item['group_id'], item['sensor'].name)
+                )
+            except urllib.error.HTTPError as err:
+                if err.code == 422:
+                    self.logger.critical(
+                        'SensorreadingBuffer.run(): Push failed. Sensorreading not processable. Discarding PS %s LS %s',
+                        item['sensor'].name, str(item['payload']['id'])
+                    )
+                    return None
+
+                self.stash.prepend(item)
+                self.logger.warning(
+                    'SensorreadingBuffer.run(): Push failed with error. Item was returned to stash (size: %i) for '
+                    'PS %s LS %s: %s',
+                    self.stash.count(), item['sensor'].name, str(item['payload']['id']), result.error
+                )
+                return None
+
+            if result is None:
+                self.stash.prepend(item)
+                self.logger.warning(
+                    'SensorreadingBuffer.run(): Push failed with not error. Item was returned to stash (size: %i) for '
+                    'PS %s LS %s',
+                    self.stash.count(), item['sensor'].name, str(item['payload']['id'])
+                )
+                return None
+
+            return True
+
     def run(self):
         self.logger.debug('SensorreadingBuffer.run(): Start flushing stash. %i items present.' % self.stash.count())
         item = self.stash.pop()
         while item is not None:
-            with api_client.ApiClient('sensorreadings') as api:
-                result = None
-                try:
-                    result = api.call({
-                        'group_id': item['group_id'],
-                        'logical_sensor_id': str(item['payload']['id']),
-                        'rawvalue': str(item['payload']['data']),
-                        'read_at': item['read_at']
-                    })
-                    self.logger.debug(
-                        'SensorreadingBuffer.run(): Pushed group_id %s sensor %s' %
-                        (item['group_id'], item['sensor'].name)
-                    )
-                except urllib.error.HTTPError as err:
-                    self.stash.put(item)
-                    try:
-                        result = json.loads(err.read())
-                    except JSONDecodeError as json_err:
-                        self.logger.warning(
-                            'SensorreadingBuffer.run(): Push failed, item was returned to stash (size: %i) for '
-                            'PS %s LS %s: %s',
-                            self.stash.count(), item['sensor'].name, str(item['payload']['id']), format(json_err)
-                        )
-                    else:
-                        self.logger.warning(
-                            'SensorreadingBuffer.run(): Push failed, item was returned to stash (size: %i) for '
-                            'PS %s LS %s: %s',
-                            self.stash.count(), item['sensor'].name, str(item['payload']['id']), result.error
-                        )
-                    time.sleep(5)
-                if result is None:
-                    self.stash.put(item)
-                    self.logger.warning(
-                        'SensorreadingBuffer.run(): Push failed, item was returned to stash (size: %i) for '
-                        'PS %s LS %s',
-                        self.stash.count(), item['sensor'].name, str(item['payload']['id'])
-                    )
-                    time.sleep(5)
+            result = self.__submit_sensorreading(item)
+
+            if result is None:
+                time.sleep(5)
 
             item = self.stash.pop()
 
