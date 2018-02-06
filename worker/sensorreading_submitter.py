@@ -73,7 +73,7 @@ class SensorreadingSubmitter(Process):
             return
 
         for name, data in result.items():
-            self.stash.put({
+            self.stash.append({
                 'payload': data,
                 'group_id': group_id,
                 'sensor': sensor,
