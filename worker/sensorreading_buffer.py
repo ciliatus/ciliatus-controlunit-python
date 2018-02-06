@@ -50,13 +50,15 @@ class SensorreadingBuffer(Process):
                         result = json.loads(err.read())
                     except JSONDecodeError as json_err:
                         self.logger.warning(
-                            'SensorreadingBuffer.run(): Push failed, item was returned to stash for '
-                            'PS %s LS %s: %s', item['sensor'].name, str(item['payload']['id']), format(json_err)
+                            'SensorreadingBuffer.run(): Push failed, item was returned to stash (size: %i) for '
+                            'PS %s LS %s: %s',
+                            self.stash.count(), item['sensor'].name, str(item['payload']['id']), format(json_err)
                         )
                     else:
                         self.logger.warning(
-                            'SensorreadingBuffer.run(): Push failed, item was returned to stash for '
-                            'PS %s LS %s: %s', item['sensor'].name, str(item['payload']['id']), result.error
+                            'SensorreadingBuffer.run(): Push failed, item was returned to stash (size: %i) for '
+                            'PS %s LS %s: %s',
+                            self.stash.count(), item['sensor'].name, str(item['payload']['id']), result.error
                         )
                     time.sleep(5)
                 if result is None:
