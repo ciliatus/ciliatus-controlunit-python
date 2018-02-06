@@ -30,8 +30,6 @@ class SensorreadingBuffer(Process):
 
     def __submit_sensorreading(self, item):
         with api_client.ApiClient('sensorreadings') as api:
-            result = None
-
             try:
                 result = api.call({
                     'group_id': item['group_id'],
@@ -55,7 +53,7 @@ class SensorreadingBuffer(Process):
                 self.logger.warning(
                     'SensorreadingBuffer.run(): Push failed with error. Item was returned to stash (size: %i) for '
                     'PS %s LS %s: %s',
-                    self.stash.count(), item['sensor'].name, str(item['payload']['id']), result.error
+                    self.stash.count(), item['sensor'].name, str(item['payload']['id']), err.reason
                 )
                 return None
 
