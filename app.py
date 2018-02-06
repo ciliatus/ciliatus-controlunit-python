@@ -16,7 +16,7 @@ import system.log as log
 import system.stash as stash
 from system.api_client import ApiClient
 from system.components import component_factory
-from worker import desired_state_fetcher, sensorreading_submitter, sensorreading_buffer
+from worker import desired_state_fetcher, sensorreading_submitter, sensorreading_buffer, maintenance
 
 try:
     util.find_spec('RPI.GPIO')
@@ -56,6 +56,11 @@ class App(object):
                 'last_run': None,
                 'timeout': int(self.config.get('api', 'sensorreading_buffer_flush_interval')),
                 'thread': None
+            },
+            'maintenance': {
+                'last_run': None,
+                'timeout': int(self.config.get('api', 'maintenance_interval')),
+                'thread': None
             }
         }
 
@@ -70,20 +75,6 @@ class App(object):
         :return:
         """
         self.components = []
-
-    def __check_in(self):
-        with ApiClient('controlunits/' + self.config.get('main', 'id') + '/check_in') as api:
-            try:
-                api.call({
-                    'software_version': self.VERSION
-                }, 'PUT')
-            except urllib.error.HTTPError as err:
-                try:
-                    result = json.loads(err.read())
-                except JSONDecodeError as json_err:
-                    self.logger.critical('Controlunit checking failed: %s', format(json_err))
-                else:
-                    self.logger.critical('Controlunit checking failed: %s', format(result.error))
 
     def __load_and_setup_components(self):
         """ Loads all non-sensor components from config and sets up their gpio.
@@ -156,6 +147,12 @@ class App(object):
                     target=sensorreading_buffer.SensorreadingBuffer,
                     args=(thread_id, thread_name + '-' + str(thread_id), self.stash)
                 )
+        elif thread_name == 'maintenance':
+            self.threads[thread_name]['thread'] = \
+                Process(
+                    target=maintenance.Maintenance,
+                    args=(thread_id, thread_name + '-' + str(thread_id), self.config.get('main', 'id'), self.VERSION)
+                )
         else:
             self.logger.critical('App.__spawn_thread: Unknown class name for thread: %s.', thread_name)
             return
@@ -212,7 +209,6 @@ class App(object):
         :return:
         """
         self.__load_and_setup_components()
-        self.__check_in()
 
         while True:
             self.__check_threads()
