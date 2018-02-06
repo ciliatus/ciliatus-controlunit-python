@@ -65,8 +65,9 @@ class SensorreadingBuffer(Process):
                 if result is None:
                     self.stash.put(item)
                     self.logger.warning(
-                        'SensorreadingBuffer.run(): Push failed, item was returned to stash for '
-                        'PS %s LS %s', item['sensor'].name, str(item['payload']['id'])
+                        'SensorreadingBuffer.run(): Push failed, item was returned to stash (size: %i) for '
+                        'PS %s LS %s',
+                        self.stash.count(), item['sensor'].name, str(item['payload']['id'])
                     )
                     time.sleep(5)
 
