@@ -32,6 +32,7 @@ class Maintenance(Process):
 
     def __check_in(self):
         with api_client.ApiClient('controlunits/%s/check_in' % self.id) as api:
+            result = None
             try:
                 client_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 result = api.call({

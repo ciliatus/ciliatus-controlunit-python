@@ -30,6 +30,7 @@ class SensorreadingBuffer(Process):
 
     def __submit_sensorreading(self, item):
         with api_client.ApiClient('sensorreadings') as api:
+            result = None
             try:
                 result = api.call({
                     'group_id': item['group_id'],
