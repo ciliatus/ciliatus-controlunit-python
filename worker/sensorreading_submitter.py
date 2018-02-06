@@ -77,7 +77,7 @@ class SensorreadingSubmitter(Process):
                 'payload': data,
                 'group_id': group_id,
                 'sensor': sensor,
-                'created_at': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                'read_at': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
             self.logger.debug(
                 'SensorreadingSubmitter.__handle_sensorreading: Put stash (size %i) group_id %s sensor %s',
