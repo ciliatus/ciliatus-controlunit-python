@@ -24,9 +24,14 @@ class Stash(object):
     def count(self):
         return len(self.items)
 
-    def put(self, item):
+    def append(self, item):
         self.lock.acquire()
         self.items.append(item)
+        self.lock.release()
+
+    def prepend(self, item):
+        self.lock.acquire()
+        self.items.insert(0, item)
         self.lock.release()
 
     def pop(self):
