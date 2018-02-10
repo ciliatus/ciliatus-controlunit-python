@@ -50,20 +50,20 @@ class HttpRequest(object):
             result = urllib.request.urlopen(req, timeout=timeout)
         except socket.timeout:
             self.logger.critical("HttpRequest.dispatch_request: %s timed out after %s seconds.", path, str(timeout))
-            return None
+            raise err
         except ValueError as err:
             self.logger.critical("HttpRequest.dispatch_request: ValueError while opening url %s: %s", path, format(err))
-            return None
+            raise err
         except urllib.error.HTTPError as err:
             self.logger.critical("HttpRequest.dispatch_request: HTTPError while opening url %s: %s\n%s",
                                  path, format(err), err.read())
-            return None
+            raise err
         except urllib.error.URLError as err:
             self.logger.critical("HttpRequest.dispatch_request: URLError while opening url %s: %s", path, format(err))
-            return None
+            raise err
         except Exception as err:
             self.logger.critical("HttpRequest.dispatch_request: Unknown Error while opening url %s: %s", path, format(err))
-            return None
+            raise err
 
         try:
             result = result.read()
@@ -72,7 +72,7 @@ class HttpRequest(object):
                 "HttpRequest.dispatch_request: Unknown Error while reading result of request to url %s: %s",
                 path, format(err)
             )
-            return None
+            raise err
 
         return result
 
