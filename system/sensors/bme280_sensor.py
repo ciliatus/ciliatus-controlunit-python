@@ -48,17 +48,21 @@ class BME280Sensor(sensor.Sensor):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
+    def __point_multiplexer(self):
+        bus = smbus.SMBus(self.config.get('i2c', 'bus'))
+        bus.write_byte(int(self.i2c_multiplexer_address, 16), int(self.i2c_multiplexer_port, 16))
+        self.logger.debug('BME280Sensor.__fetch_raw_data: Multiplexer on %s pointed to device %s',
+                          str(self.i2c_multiplexer_address), str(self.i2c_multiplexer_port))
+        time.sleep(5)
+
     def __fetch_raw_data(self, is_second_try=False):
         """ Tries to fetch data from the sensor
         :param is_second_try: boolean if False a second try will be attempted on failure
         :return: dict with retrieved data or None
         """
         if self.i2c_multiplexer_address and not is_second_try:
-            bus = smbus.SMBus(self.config.get('i2c', 'bus'))
-            bus.write_byte(int(self.i2c_multiplexer_address, 16), int(self.i2c_multiplexer_port, 16))
-            self.logger.debug('BME280Sensor.__fetch_raw_data: Multiplexer on %s pointed to device %s',
-                              str(self.i2c_multiplexer_address), str(self.i2c_multiplexer_port))
-            time.sleep(5)
+            self.__point_multiplexer()
+
         try:
             self.logger.debug('BME280Sensor.__fetch_raw_data: Retrieving data from i2c address %s', self.i2c_address)
             s = Adafruit_BME280.BME280(address=int(self.i2c_address, 16))
