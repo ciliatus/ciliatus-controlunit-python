@@ -19,7 +19,7 @@ from system.components import component_factory
 from worker import desired_state_fetcher, sensorreading_submitter, sensorreading_buffer, maintenance
 
 try:
-    util.find_spec('RPI.GPIO')
+    util.find_spec('RPi.GPIO')
     import RPi.GPIO as GPIO
 except ModuleNotFoundError:
     log.get_logger().debug('App: Skipping RPi.GPIO module because it was not found')
@@ -85,9 +85,10 @@ class App(object):
         self.__cleanup_components()
 
         try:
-            util.find_spec('RPI.GPIO')
+            util.find_spec('RPi.GPIO')
             GPIO.setmode(GPIO.BCM)
         except ModuleNotFoundError:
+            self.logger.info('App.__load_and_setup_components: RPI.GPIO module not found. Did not setup GPIO mode.')
             return
 
         for section in self.config.sections():
