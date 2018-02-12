@@ -5,7 +5,7 @@ Primarily used for GPIO controlled sensors on a Raspberry Pi
 # Requirements
 
 * Python >=3.6
-* [Ciliatus](https://github.com/matthenning/ciliatus) >=v1.6-beta
+* [Ciliatus](https://github.com/matthenning/ciliatus) >=v2.0
 * [RPi.GPIO](https://pypi.python.org/pypi/RPi.GPIO) (for Raspberry PIs)
 * [MyPyDHT](https://github.com/freedom27/MyPyDHT) (for Raspberry PIs)
 
@@ -39,4 +39,4 @@ MyPyDHT supports the following sensors:
 * AM2302
 * BME280
 
-Other I2C sensors than BME280 should be relatively simple to implement using the existing infrastructure.
+Other sensors should be relatively simple to implement using the existing infrastructure.
