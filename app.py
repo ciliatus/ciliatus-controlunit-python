@@ -24,7 +24,7 @@ except ModuleNotFoundError:
 
 class App(object):
 
-    VERSION = 'Ciliatus Controlunit v1.1'
+    VERSION = 'Ciliatus Controlunit v2.0'
 
     logger = log.get_logger()
     config = configparser.ConfigParser()
@@ -210,6 +210,7 @@ class App(object):
         while True:
             self.__check_threads()
             time.sleep(2)
+
 
 logger = log.setup_logger(level=logging.INFO)
 config = configparser.ConfigParser()
