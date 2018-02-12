@@ -51,9 +51,12 @@ class BME280Sensor(sensor.Sensor):
     def __point_multiplexer(self):
         bus = smbus.SMBus(self.config.get('i2c', 'bus'))
         bus.write_byte(int(self.i2c_multiplexer_address, 16), int(self.i2c_multiplexer_port, 16))
-        self.logger.debug('BME280Sensor.__fetch_raw_data: Multiplexer on %s pointed to device %s',
+        self.logger.debug('BME280Sensor.__fetch_raw_data: Multiplexer on %s pointed to channel %s',
                           str(self.i2c_multiplexer_address), str(self.i2c_multiplexer_port))
-        time.sleep(5)
+        time.sleep(1)
+        self.logger.debug('BME280Sensor.__fetch_raw_data: Multiplexer reports channel %s',
+                          str(bus.read_byte(int(self.i2c_multiplexer_address, 16))))
+        time.sleep(1)
 
     def __fetch_raw_data(self, is_second_try=False):
         """ Tries to fetch data from the sensor
