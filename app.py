@@ -2,19 +2,15 @@
 # -*- coding: utf-8 -*-
 import configparser
 import datetime
-import json
 import logging
 import time
-import urllib.error
 from importlib import util
-from json import JSONDecodeError
 from multiprocessing import Process, freeze_support
 from multiprocessing.managers import BaseManager
 from random import randint
 
 import system.log as log
 import system.stash as stash
-from system.api_client import ApiClient
 from system.components import component_factory
 from worker import desired_state_fetcher, sensorreading_submitter, sensorreading_buffer, maintenance
 
