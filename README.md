@@ -43,7 +43,8 @@ Other sensors should be relatively simple to implement using the existing infras
 
 # Troubleshooting
 
-*I2C devices are not responding or not showing up*
+### I2C devices are not responding or not showing up
+
 I2C is sensitive to high distances. Try lowering the I2C clock and using a shielded cable.
 Lowering the clock on RaspberryPi is done by adding the follow line (for 20kHz) in /boot/config.txt:
 `dtparam=i2c_arm_baudrate=20000`
