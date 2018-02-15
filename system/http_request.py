@@ -48,7 +48,7 @@ class HttpRequest(object):
 
         try:
             result = urllib.request.urlopen(req, timeout=timeout)
-        except socket.timeout:
+        except socket.timeout as err:
             self.logger.critical("HttpRequest.dispatch_request: %s timed out after %s seconds.", path, str(timeout))
             raise err
         except ValueError as err:
