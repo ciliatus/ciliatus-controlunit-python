@@ -30,7 +30,7 @@ class BME280Sensor(i2c_sensor.I2CSensor):
         self.i2c_address = self.config.get(config, 'i2c_address')
 
         if self.config.has_option(config, 'i2c_multiplexer_address'):
-            self.i2c_multiplexer_address = self.config.get(config, 'i2c_multiplexer_address')
+            self.i2c_multiplexer_address = int(self.config.get(config, 'i2c_multiplexer_address'), 16)
             self.i2c_multiplexer_port = int(self.config.get(config, 'i2c_multiplexer_port'))
         else:
             self.i2c_multiplexer_address = None

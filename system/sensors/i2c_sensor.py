@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+import math
 import time
 from importlib import util
 
@@ -17,19 +18,9 @@ class I2CSensor(sensor.Sensor):
 
     logger = log.get_logger()
 
-    i2c_address = ''
-    i2c_multiplexer_address = ''
-    i2c_multiplexer_port = ''
-    i2c_channels = {
-        0: 0b00000001,
-        1: 0b00000010,
-        2: 0b00000100,
-        3: 0b00001000,
-        4: 0b00010000,
-        5: 0b00100000,
-        6: 0b01000000,
-        7: 0b10000000
-    }
+    i2c_address = 0
+    i2c_multiplexer_address = 0
+    i2c_multiplexer_port = 0
 
     def __init__(self):
         sensor.Sensor.__init__(self)
@@ -41,11 +32,21 @@ class I2CSensor(sensor.Sensor):
         pass
 
     def point_multiplexer(self):
+        """
+        Points an I2C multiplexer to the desired channel.
+        Tested with TCA9548A
+        """
         bus = smbus.SMBus(self.config.get('i2c', 'bus'))
-        bus.write_byte(int(self.i2c_multiplexer_address, 16), self.i2c_channels[self.i2c_multiplexer_port])
-        self.logger.debug('I2CSensor.__point_multiplexer: Multiplexer on %s pointed to channel %s',
-                          str(self.i2c_multiplexer_address), str(self.i2c_multiplexer_port))
+
+        bin_channel = int(math.pow(2, self.i2c_multiplexer_port))
+
+        bus.write_byte(self.i2c_multiplexer_address, bin_channel)
+
+        self.logger.debug('I2CSensor.__point_multiplexer: Multiplexer on %s pointed to channel %i',
+                          str(self.i2c_multiplexer_address), self.i2c_multiplexer_port)
+
         time.sleep(0.1)
+
         self.logger.debug('I2CSensor.__point_multiplexer: Multiplexer reports channel %s',
-                          str(bus.read_byte(int(self.i2c_multiplexer_address, 16))))
+                          str(bus.read_byte(self.i2c_multiplexer_address)))
         time.sleep(0.1)
