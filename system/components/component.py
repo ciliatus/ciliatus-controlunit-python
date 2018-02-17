@@ -7,7 +7,7 @@ import system.log as log
 
 try:
     util.find_spec('RPi.GPIO')
-    import RPi.GPIO
+    import RPi.GPIO as GPIO
 except ModuleNotFoundError:
     log.get_logger().critical("Component.__init__(): RPi.GPIO missing")
 
