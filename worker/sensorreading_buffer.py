@@ -4,6 +4,8 @@ import time
 import urllib
 from multiprocessing import Process
 
+import sys
+
 import system.log as log
 from system import api_client
 
@@ -11,13 +13,13 @@ from system import api_client
 class SensorreadingBuffer(Process):
 
     logger = log.get_logger()
-    stash = None
+    queue = None
 
-    def __init__(self, thread_id, name, stash):
+    def __init__(self, thread_id, name, queue):
         Process.__init__(self)
         self.thread_id = thread_id
         self.name = name
-        self.stash = stash
+        self.queue = queue
         self.run()
 
     def __enter__(self):
@@ -48,34 +50,42 @@ class SensorreadingBuffer(Process):
                     )
                     return None
 
-                self.stash.prepend(item)
+                self.queue.prepend(item)
                 self.logger.warning(
-                    'SensorreadingBuffer.run(): Push failed with error. Item was returned to stash (size: %i) for '
+                    'SensorreadingBuffer.run(): Push failed with error. Item was returned to queue (size: %i) for '
                     'PS %s LS %s: %s',
-                    self.stash.count(), item['sensor'].name, str(item['payload']['id']), err.reason
+                    self.queue.count(), item['sensor'].name, str(item['payload']['id']), err.reason
+                )
+                return None
+            except:
+                self.queue.prepend(item)
+                self.logger.warning(
+                    'SensorreadingBuffer.run(): Push failed with error. Item was returned to queue (size: %i) for '
+                    'PS %s LS %s: %s',
+                    self.queue.count(), item['sensor'].name, str(item['payload']['id']), sys.exc_info()
                 )
                 return None
 
             if result is None:
-                self.stash.prepend(item)
+                self.queue.prepend(item)
                 self.logger.warning(
-                    'SensorreadingBuffer.run(): Push failed with no error. Item was returned to stash (size: %i) for '
+                    'SensorreadingBuffer.run(): Push failed with no error. Item was returned to queue (size: %i) for '
                     'PS %s LS %s',
-                    self.stash.count(), item['sensor'].name, str(item['payload']['id'])
+                    self.queue.count(), item['sensor'].name, str(item['payload']['id'])
                 )
                 return None
 
             return True
 
     def run(self):
-        self.logger.debug('SensorreadingBuffer.run(): Start flushing stash. %i items present.' % self.stash.count())
-        item = self.stash.pop()
+        self.logger.debug('SensorreadingBuffer.run(): Start flushing queue. %i items present.' % self.queue.count())
+        item = self.queue.pop()
         while item is not None:
             result = self.__submit_sensorreading(item)
 
             if result is None:
                 time.sleep(5)
 
-            item = self.stash.pop()
+            item = self.queue.pop()
 
-        self.logger.debug('SensorreadingBuffer.run(): Stash flush ended. %i items remaining.' % self.stash.count())
+        self.logger.debug('SensorreadingBuffer.run(): Stash flush ended. %i items remaining.' % self.queue.count())

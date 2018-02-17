@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from collections import deque
 from threading import Lock
 
 from system import log
 
 
-class Stash(object):
+class Queue(object):
 
     logger = log.get_logger()
-    items = []
+    queue = None
     lock = Lock()
 
     def __init__(self):
-        self.items = []
+        self.queue = deque()
         pass
 
     def __enter__(self):
@@ -22,24 +23,24 @@ class Stash(object):
         pass
 
     def count(self):
-        return len(self.items)
+        return len(self.queue)
 
     def append(self, item):
         self.lock.acquire()
-        self.items.append(item)
+        self.queue.append(item)
         self.lock.release()
 
     def prepend(self, item):
         self.lock.acquire()
-        self.items.insert(0, item)
+        self.queue.appendleft(item)
         self.lock.release()
 
     def pop(self):
-        if len(self.items) < 1:
+        if self.count() < 1:
             return None
 
         self.lock.acquire()
-        item = self.items.pop()
+        item = self.queue.pop()
         self.lock.release()
 
         return item

@@ -10,7 +10,7 @@ from multiprocessing.managers import BaseManager
 from random import randint
 
 import system.log as log
-import system.stash as stash
+import system.queue as queue
 from system.components import component_factory
 from worker import desired_state_fetcher, sensorreading_submitter, sensorreading_buffer, maintenance
 
@@ -33,10 +33,10 @@ class App(object):
 
     def __init__(self):
         self.config.read('config.ini')
-        BaseManager.register('Stash', stash.Stash)
+        BaseManager.register('Queue', queue.Queue)
         manager = BaseManager()
         manager.start()
-        self.stash = manager.Stash()
+        self.queue = manager.Queue()
         self.threads = {
             'sensorreading_submitter': {
                 'last_run': None,
@@ -130,7 +130,7 @@ class App(object):
             self.threads[thread_name]['thread'] = \
                 Process(
                     target=sensorreading_submitter.SensorreadingSubmitter,
-                    args=(thread_id, thread_name + '-' + str(thread_id), self.stash),
+                    args=(thread_id, thread_name + '-' + str(thread_id), self.queue),
                 )
         elif thread_name == 'desired_state_fetcher':
             self.threads[thread_name]['thread'] = \
@@ -142,7 +142,7 @@ class App(object):
             self.threads[thread_name]['thread'] = \
                 Process(
                     target=sensorreading_buffer.SensorreadingBuffer,
-                    args=(thread_id, thread_name + '-' + str(thread_id), self.stash)
+                    args=(thread_id, thread_name + '-' + str(thread_id), self.queue)
                 )
         elif thread_name == 'maintenance':
             self.threads[thread_name]['thread'] = \

@@ -16,13 +16,13 @@ class SensorreadingSubmitter(Process):
     logger = log.get_logger()
     sensors = []
     counter = 0
-    stash = None
+    queue = None
 
-    def __init__(self, thread_id, name, stash):
+    def __init__(self, thread_id, name, queue):
         Process.__init__(self)
         self.thread_id = thread_id
         self.name = name
-        self.stash = stash
+        self.queue = queue
 
         self.config.read('config.ini')
         self.__load_sensors()
@@ -73,15 +73,15 @@ class SensorreadingSubmitter(Process):
             return
 
         for name, data in result.items():
-            self.stash.append({
+            self.queue.append({
                 'payload': data,
                 'group_id': group_id,
                 'sensor': sensor,
                 'read_at': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
             self.logger.debug(
-                'SensorreadingSubmitter.__handle_sensorreading: Put stash (size %i) group_id %s sensor %s',
-                self.stash.count(), group_id, sensor.name
+                'SensorreadingSubmitter.__handle_sensorreading: Put queue (size %i) group_id %s sensor %s',
+                self.queue.count(), group_id, sensor.name
             )
 
     def __get_sensorreading(self, sensor, group_id):
