@@ -24,7 +24,7 @@ except ModuleNotFoundError:
 
 class App(object):
 
-    VERSION = 'Ciliatus Control Unit v2.0'
+    VERSION = 'Ciliatus Control Unit v2.0-RC2'
 
     logger = log.get_logger()
     config = configparser.ConfigParser()
