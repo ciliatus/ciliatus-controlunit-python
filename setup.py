@@ -8,5 +8,5 @@ setup(
     license='GPL-3.0',
     author='Matthias Henning',
     author_email='info@ciliatus.io',
-    description='Controlunit for Ciliatus'
+    description='Control Unit for Ciliatus'
 )

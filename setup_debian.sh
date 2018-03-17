@@ -11,5 +11,5 @@ cd MyPyDHT/
 sudo python setup.py install
 cd ..
 
-echo "Installing ciliatus controlunit ..."
+echo "Installing ciliatus Control Unit ..."
 sudo python setup.py

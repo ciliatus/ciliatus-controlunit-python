@@ -47,6 +47,6 @@ class Maintenance(Process):
             return True
 
     def run(self):
-        self.logger.debug('Maintenance.run(): Checking in controlunit')
+        self.logger.debug('Maintenance.run(): Checking in Control Unit')
         self.__check_in()
         self.logger.debug('Maintenance.run(): Done')
