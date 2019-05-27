@@ -54,6 +54,10 @@ class ApiClient(object):
         raw_data = self.http_request.dispatch_request(self.path, data, method, 15)
         if raw_data is None:
             return None
+        try:
+            raw_data = raw_data.decode()
+        except AttributeError:
+            pass
 
         try:
             json_data = json.loads(raw_data)
