@@ -172,9 +172,8 @@ class App(object):
                             and select the matching class and method for the thread
         :return:
         """
-        if self.threads[thread_name]['last_run'] is None:
-            self.__spawn_thread(thread_name)
-        elif self.__get_last_run_seconds(thread_name) > self.threads[thread_name]['timeout']:
+        if self.threads[thread_name]['last_run'] is None or \
+                self.__get_last_run_seconds(thread_name) > self.threads[thread_name]['timeout']:
             self.__spawn_thread(thread_name)
         else:
             self.logger.debug('App.__check_thread_conditions_and_spawn: Timeout is not done yet for %s. Remaining: %ss',
