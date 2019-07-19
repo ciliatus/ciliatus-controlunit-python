@@ -186,9 +186,7 @@ class App(object):
                             and select the matching class and method for the thread
         :return:
         """
-        if self.threads[thread_name]['thread'] is None:
-            self.__check_thread_conditions_and_spawn(thread_name)
-        elif not self.threads[thread_name]['thread'].is_alive():
+        if self.threads[thread_name]['thread'] is None or not self.threads[thread_name]['thread'].is_alive():
             self.__check_thread_conditions_and_spawn(thread_name)
         else:
             self.logger.debug('App.__check_thread: Thread %s already running.', thread_name)
