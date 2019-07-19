@@ -110,6 +110,7 @@ class SensorreadingSubmitter(Process):
         for sensor in self.sensors:
             self.__get_sensorreading(sensor, group_id)
 
+        self.queue.checkpoint()
         self.logger.debug('SensorreadingSubmitter.do_work: Completed group id %s after %ss.',
                           group_id, int((datetime.datetime.now() - started).total_seconds()))
 

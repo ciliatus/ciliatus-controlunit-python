@@ -33,7 +33,7 @@ class App(object):
 
     def __init__(self):
         self.config.read('config.ini')
-        BaseManager.register('Queue', queue.Queue)
+        BaseManager.register('Queue', queue.Queue('sr_buffer'))
         manager = BaseManager()
         manager.start()
         self.queue = manager.Queue()
